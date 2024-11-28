@@ -128,7 +128,7 @@ function ubah($data) {
 }
 */
 
-function cari($keyword) {
+function cariBuku($keyword) {
 	$query = "SELECT * FROM buku
 				WHERE
 			  judul LIKE '%$keyword%' OR
@@ -140,6 +140,71 @@ function cari($keyword) {
 			";
 	return query($query);
 }
+function tambahBuku($data) {
+	global $conn;
+
+	$judul = htmlspecialchars($data["judul"]);
+	$pengarang = htmlspecialchars($data["pengarang"]);
+	$penerbit = htmlspecialchars($data["penerbit"]);
+	$tahun_terbit = htmlspecialchars($data["tahun_terbit"]);
+	$kategori = htmlspecialchars($data["kategori"]);
+	$jumlah = htmlspecialchars($data["jumlah"]);
+	$ISBN = htmlspecialchars($data["ISBN"]);
+	$stok = htmlspecialchars($data["stok"]);
+	$query = "INSERT INTO buku (judul, pengarang, penerbit, tahun_terbit, kategori, jumlah, ISBN, stok)
+				VALUES
+			  ('$judul', '$pengarang', '$penerbit', '$tahun_terbit', '$kategori', '$jumlah', '$ISBN', '$stok')
+			";
+	mysqli_query($conn, $query);
+
+	return mysqli_affected_rows($conn);
+}
+
+function ubahBuku($data) {
+	global $conn;
+
+	$id = $data["id_buku"];
+	$judul = htmlspecialchars($data["judul"]);
+	$pengarang = htmlspecialchars($data["pengarang"]);
+	$penerbit = htmlspecialchars($data["penerbit"]);
+	$tahun_terbit = htmlspecialchars($data["tahun_terbit"]);
+	$kategori = htmlspecialchars($data["kategori"]);
+	$jumlah = htmlspecialchars($data["jumlah"]);
+	$ISBN = htmlspecialchars($data["ISBN"]);
+	$stok = htmlspecialchars($data["stok"]);
+	
+	// if( $_FILES['cover']['error'] === 4 ) {
+		// $cover = $coverLama;
+	// } else {
+		// $cover = upload();
+	// }
+	
+
+	$query = "UPDATE buku SET
+				judul = '$judul',
+				pengarang = '$pengarang',
+				penerbit = '$penerbit',
+				tahun_terbit = '$tahun_terbit',
+				kategori = '$kategori',
+				jumlah = '$jumlah',
+				ISBN = '$ISBN',
+				stok = '$stok'
+			  WHERE id_buku = $id
+			";
+
+	mysqli_query($conn, $query);
+
+	return mysqli_affected_rows($conn);	
+}
+
+function hapusBuku($id) {
+	global $conn;
+	mysqli_query($conn, "DELETE FROM buku WHERE id_buku = $id");
+	return mysqli_affected_rows($conn);
+}
+
+
+
 function cariAnggota($keyword) {
 	$query = "SELECT * FROM anggota
 				WHERE
@@ -181,6 +246,106 @@ function hapusAnggota($id) {
 	mysqli_query($conn, "DELETE FROM anggota WHERE id_anggota = $id");
 	return mysqli_affected_rows($conn);
 }
+
+function ubahAnggota($data) {
+	global $conn;
+
+	$id = $data["id_anggota"];
+	$nama = htmlspecialchars($data["nama_anggota"]);
+	$alamat = htmlspecialchars($data["alamat"]);
+	$no_telepon = htmlspecialchars($data["no_telepon"]);
+	$jenis_kelamin = htmlspecialchars($data["jenis_kelamin"]);
+	$fotoLama = htmlspecialchars($data["fotoLama"]);
+	
+	// cek apakah user pilih foto baru atau tidak
+	if( $_FILES['foto']['error'] === 4 ) {
+		$foto = $fotoLama;
+	} else {
+		$foto = upload();
+	}
+	
+
+	$query = "UPDATE anggota SET
+				nama_anggota = '$nama',
+				alamat = '$alamat',
+				no_telepon = '$no_telepon',
+				jenis_kelamin = '$jenis_kelamin',
+				foto = '$foto'
+			  WHERE id_anggota = $id
+			";
+
+	mysqli_query($conn, $query);
+
+	return mysqli_affected_rows($conn);	
+}
+
+
+
+
+
+
+function cariPetugas($keyword) {
+	$query = "SELECT * FROM petugas
+				WHERE
+			  id_petugas LIKE '%$keyword%' OR
+			  nama_petugas LIKE '%$keyword%' OR
+			  jabatan LIKE '%$keyword%'
+			";
+	return query($query);
+}
+function tambahPetugas($data) {
+	global $conn;
+
+	$nama = htmlspecialchars($data["nama_petugas"]);
+	$jabatan = htmlspecialchars($data["jabatan"]);
+
+	// upload foto
+	// $foto = upload();
+	// if( !$foto ) {
+		// return false;
+	// }
+
+	$query = "INSERT INTO petugas (nama_petugas, jabatan)
+				VALUES
+			  ('$nama', '$jabatan')
+			";
+	mysqli_query($conn, $query);
+
+	return mysqli_affected_rows($conn);
+}
+
+function hapusPetugas($id) {
+	global $conn;
+	mysqli_query($conn, "DELETE FROM petugas WHERE id_petugas = $id");
+	return mysqli_affected_rows($conn);
+}
+
+function ubahPetugas($data) {
+	global $conn;
+
+	$id = $data["id_petugas"];
+	$nama = htmlspecialchars($data["nama_petugas"]);
+	$jabatan = htmlspecialchars($data["jabatan"]);
+	
+	// cek apakah user pilih foto baru atau tidak
+	// if( $_FILES['foto']['error'] === 4 ) {
+		// $foto = $fotoLama;
+	// } else {
+		// $foto = upload();
+	// }
+	
+
+	$query = "UPDATE petugas SET
+				nama_petugas = '$nama',
+				jabatan = '$jabatan'
+			  WHERE id_petugas = $id
+			";
+
+	mysqli_query($conn, $query);
+
+	return mysqli_affected_rows($conn);	
+}
+
 
 
 
