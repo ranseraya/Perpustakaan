@@ -8,7 +8,8 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] != 'admin') {
 }
 require '../config/functions.php';
 
-$id = isset($_GET["id"]) ? $_GET["id"] : 331;
+$default_id = query("SELECT id_buku FROM buku ORDER BY id_buku ASC LIMIT 1")[0]['id_buku'];
+$id = isset($_GET["id"]) ? $_GET["id"] : $default_id;
 $currentData = query("SELECT * FROM buku WHERE id_buku = $id")[0];
 
 $jumlahDataPerHalaman = 10;

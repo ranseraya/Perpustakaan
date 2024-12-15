@@ -289,7 +289,11 @@ function cariPetugas($keyword) {
 				WHERE
 			  id_petugas LIKE '%$keyword%' OR
 			  nama_petugas LIKE '%$keyword%' OR
-			  jabatan LIKE '%$keyword%'
+			  jabatan LIKE '%$keyword%' OR
+			  alamat LIKE '%$keyword%' OR
+			  no_telepon LIKE '%$keyword%' OR
+			  jenis_kelamin LIKE '%$keyword%' OR
+			  bertugas_sejak LIKE '%$keyword%'
 			";
 	return query($query);
 }
@@ -298,16 +302,18 @@ function tambahPetugas($data) {
 
 	$nama = htmlspecialchars($data["nama_petugas"]);
 	$jabatan = htmlspecialchars($data["jabatan"]);
+	$alamat = htmlspecialchars($data["alamat"]);
+	$no_telepon = htmlspecialchars($data["no_telepon"]);
+	$jenis_kelamin = htmlspecialchars($data["jenis_kelamin"]);
+	// $bertugas_sejak = htmlspecialchars($data["bertugas_sejak"]);
+	$foto = upload();
+	if( !$foto ) {
+		return false;
+	}
 
-	// upload foto
-	// $foto = upload();
-	// if( !$foto ) {
-		// return false;
-	// }
-
-	$query = "INSERT INTO petugas (nama_petugas, jabatan)
+	$query = "INSERT INTO petugas (nama_petugas, jabatan, alamat, no_telepon, jenis_kelamin, bertugas_sejak, foto)
 				VALUES
-			  ('$nama', '$jabatan')
+			  ('$nama', '$jabatan', '$alamat', '$no_telepon', '$jenis_kelamin', CURDATE(), '$foto')
 			";
 	mysqli_query($conn, $query);
 
@@ -424,7 +430,7 @@ function registrasi($data) {
 	$password = password_hash($password, PASSWORD_DEFAULT);
 
 	// tambahkan userbaru ke database
-	mysqli_query($conn, "INSERT INTO users (username, password_hash, role) VALUES('$username', '$password', 'anggota')");
+	mysqli_query($conn, "INSERT INTO users (username, password_hash, role) VALUES('$username', '$password', 'admin')");
 
 	return mysqli_affected_rows($conn);
 

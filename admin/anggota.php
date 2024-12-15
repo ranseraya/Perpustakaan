@@ -8,7 +8,8 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] != 'admin') {
 }
 require '../config/functions.php';
 
-$id = isset($_GET["id"]) ? $_GET["id"] : 1;
+$default_id = query("SELECT id_anggota FROM anggota ORDER BY id_anggota ASC LIMIT 1")[0]['id_anggota'];
+$id = isset($_GET["id"]) ? $_GET["id"] : $default_id;
 $currentData = query("SELECT * FROM anggota WHERE id_anggota = $id")[0];
 
 $jumlahDataPerHalaman = 10;
@@ -153,7 +154,7 @@ if( isset($_POST["submitUbah"]) ) {
 		<td><?= $row["no_telepon"]; ?></td>
 		<td><?= $row["jenis_kelamin"]; ?></td>
 		<td><?= $row["tanggal_registrasi"]; ?></td>
-		<td><?= $row["status"]; ?></td>
+		<td><?= $row["STATUS"]; ?></td>
         <td >
 			<div class="td-aksi">
 				<!-- <a id="editData" data-id="<?= $anggota["id_anggota"]; ?>">ubah</a>  -->

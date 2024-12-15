@@ -8,55 +8,93 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] != 'admin') {
 }
 require '../config/functions.php';
 
-$id = isset($_GET["id"]) ? $_GET["id"] : 1;
-$currentData = query("SELECT * FROM petugas WHERE id_petugas = $id")[0];
+
+$id_default = query("SELECT id_peminjaman FROM peminjaman ORDER BY id_peminjaman ASC LIMIT 1")[0]['id_peminjaman'];
+$id = isset($_GET["id"]) ? $_GET["id"] : $id_default;
+$currentData = query("SELECT 
+        peminjaman.id_peminjaman,
+        anggota.nama_anggota AS nama_anggota,
+        buku.judul AS judul_buku,
+        petugas.nama_petugas AS nama_petugas,
+        peminjaman.tanggal_peminjaman,
+        peminjaman.tanggal_pengembalian,
+        peminjaman.status_pengembalian
+    FROM 
+        peminjaman
+    JOIN 
+        anggota ON peminjaman.id_anggota = anggota.id_anggota
+    JOIN 
+        buku ON peminjaman.id_buku = buku.id_buku
+    JOIN 
+        petugas ON peminjaman.id_petugas = petugas.id_petugas
+    WHERE id_peminjaman = $id")[0];
 
 $jumlahDataPerHalaman = 10;
-$jumlahData = count(query("SELECT * FROM petugas"));
+$jumlahData = count(query("SELECT * FROM peminjaman"));
 $jumlahHalaman = ceil($jumlahData / $jumlahDataPerHalaman);
 $halamanAktif = ( isset($_GET["halaman"]) ) ? $_GET["halaman"] : 1;
 $awalData = ( $jumlahDataPerHalaman * $halamanAktif ) - $jumlahDataPerHalaman;
-$petugas = query("SELECT * FROM petugas LIMIT $awalData, $jumlahDataPerHalaman");
+
+$peminjaman = query("SELECT 
+        peminjaman.id_peminjaman,
+        anggota.nama_anggota AS nama_anggota,
+        buku.judul AS judul_buku,
+        petugas.nama_petugas AS nama_petugas,
+        peminjaman.tanggal_peminjaman,
+        peminjaman.tanggal_pengembalian,
+        peminjaman.status_pengembalian
+    FROM 
+        peminjaman
+    JOIN 
+        anggota ON peminjaman.id_anggota = anggota.id_anggota
+    JOIN 
+        buku ON peminjaman.id_buku = buku.id_buku
+    JOIN 
+        petugas ON peminjaman.id_petugas = petugas.id_petugas
+    ORDER BY 
+        peminjaman.id_peminjaman ASC 
+    LIMIT $awalData, $jumlahDataPerHalaman
+");
 
 
 if (isset($_POST["cari"])) {
-    $petugas = caripetugas($_POST["keyword"]);
+    $peminjaman = caripeminjaman($_POST["keyword"]);
 } else {
-    $buku = query("SELECT * FROM petugas LIMIT $awalData, $jumlahDataPerHalaman");
+    $buku = query("SELECT * FROM peminjaman LIMIT $awalData, $jumlahDataPerHalaman");
 }
 
 if( isset($_POST["submitTambah"]) ) {
 	
-	if( tambahpetugas($_POST) > 0 ) {
+	if( tambahpeminjaman($_POST) > 0 ) {
 		echo "
 			<script>
 				alert('data berhasil ditambahkan!');
-				document.location.href = 'petugas.php';
+				document.location.href = 'peminjaman.php';
 			</script>
 		";
 	} else {
 		echo "
 			<script>
 				alert('data gagal ditambahkan!');
-				document.location.href = 'petugas.php';
+				document.location.href = 'peminjaman.php';
 			</script>
 		";
 	}
 }
 
 if( isset($_POST["submitUbah"]) ) {
-	if( ubahpetugas($_POST) > 0 ) {
+	if( ubahpeminjaman($_POST) > 0 ) {
 		echo "
 			<script>
 				alert('data berhasil diubah!');
-				document.location.href = 'petugas.php?';
+				document.location.href = 'peminjaman.php?';
 			</script>
 		";
 	} else {
 		echo "
 			<script>
 				alert('data gagal diubah!');
-				document.location.href = 'petugas.php';
+				document.location.href = 'peminjaman.php';
 			</script>
 		";
 	}
@@ -68,7 +106,7 @@ if( isset($_POST["submitUbah"]) ) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Admin</title>
-    <link rel="stylesheet" href="../assest/petugas.css">
+    <link rel="stylesheet" href="../assest/peminjaman.css">
 </head>
 <body>
     <div class="sidebar">
@@ -86,8 +124,8 @@ if( isset($_POST["submitUbah"]) ) {
 
 
 
-<div class="menu-petugas">
-	<a id="tambahData">Tambah data petugas</a>
+<div class="menu-peminjaman">
+	<a id="tambahData">Tambah data peminjaman</a>
 	
 	<br><br>
 	
@@ -131,37 +169,28 @@ if( isset($_POST["submitUbah"]) ) {
 
 	<tr>
 		<th>No.</th>
-		<!-- <th>Foto</th> -->
-		<th>Id Petugas</th>
-		<th>Foto</th>
-		<th>Nama</th>
-		<th>Jabatan</th>
-		<th>Alamat</th>
-		<th>No Telepon</th>
-		<th>Jenis Kelamin</th>
-		<th>Bertugas Sejak</th>
-		<th>Aksi</th>
+		<th>Id peminjaman</th>
+		<th>Nama Anggota</th>
+		<th>Pengurus Peminjaman</th>
+		<th>Judul Buku</th>
+		<th>Tanggal Peminjaman</th>
+		<th>Tanggal Pengembalian</th>
+		<th>Status Pemgembian</th>
+		<!-- <th>Aksi</th> -->
 	</tr>
 
 	<?php $i = 1; ?>
-	<?php foreach( $petugas as $row ) : ?>
+	<?php foreach( $peminjaman as $row ) : ?>
 	<tr>
 		<td><?= $i+$jumlahDataPerHalaman*($halamanAktif-1); ?></td>
-		<td><img src="../assest/images/<?= $row["foto"];?>" width="100" style="border-radius:50%;"></td>
-		<td style="text-align: center;"><?= $row["id_petugas"]; ?></td>
+		<!-- <td><img src="../assest/images/<?= $row["foto"];?>" width="100" style="border-radius:50%;"></td> -->
+		<td style="text-align: center;"><?= $row["id_peminjaman"]; ?></td>
+		<td><?= $row["nama_anggota"]; ?></td>
 		<td><?= $row["nama_petugas"]; ?></td>
-		<td><?= $row["jabatan"]; ?></td>
-		<td><?= $row["alamat"]; ?></td>
-		<td><?= $row["no_telepon"]; ?></td>
-		<td><?= $row["jenis_kelamin"]; ?></td>
-		<td><?= $row["bertugas_sejak"]; ?></td>
-        <td >
-			<div class="td-aksi">
-				<!-- <a id="editData" data-id="<?= $petugas["id_petugas"]; ?>">ubah</a>  -->
-				 <a id="editData" href="petugas.php?id=<?= $row["id_petugas"]; ?>">Ubah</a>
-				<a href="../config/hapus.php?aksi=petugas&halaman=<?= $halamanAktif; ?> &id=<?= $row["id_petugas"]; ?>" onclick="return confirm('yakin?');">hapus</a>
-			</div>
-		</td>
+		<td><?= $row["judul_buku"]; ?></td>
+		<td><?= $row["tanggal_peminjaman"]; ?></td>
+		<td><?= $row["tanggal_pengembalian"]; ?></td>
+		<td><?= $row["status_pengembalian"]; ?></td>
 	</tr>
 	<?php $i++; ?>
 	<?php endforeach; ?>
@@ -174,12 +203,12 @@ if( isset($_POST["submitUbah"]) ) {
 <div class="container-overlay" id="tambahData-overlay">
 	<div class="container-content">
 		<span class="close-popup" id="close-tambahData">&times;</span>
-		<h1>Tambah Data Petugas</h1>
+		<h1>Tambah Data peminjaman</h1>
 		<form action="" method="post" enctype="multipart/form-data">
 			<ul>
 				<li>
-					<label for="nama_petugas">Nama: </label>
-					<input type="text" name="nama_petugas" id="nama_petugas" required>
+					<label for="nama_peminjaman">Nama: </label>
+					<input type="text" name="nama_peminjaman" id="nama_peminjaman" required>
 				</li>
 				<li>
 					<label for="jabatan">Jabatan: </label>
@@ -218,14 +247,14 @@ if( isset($_POST["submitUbah"]) ) {
 <div class="container-overlay" id="editData-overlay">
         <div class="container-content">
             <span class="close-popup" id="close-editData">&times;</span>
-            <h1>Edit Data petugas</h1>
+            <h1>Edit Data peminjaman</h1>
             <form action="" method="post" enctype="multipart/form-data">
-                <input type="hidden" name="id_petugas" value="<?= $currentData["id_petugas"]; ?>">
+                <input type="hidden" name="id_peminjaman" value="<?= $currentData["id_peminjaman"]; ?>">
                 <!-- <input type="hidden" name="fotoLama" value="<?= $currentData["foto"]; ?>"> -->
                 <ul>
                     <li>
-                        <label for="nama_petugas">Nama: </label>
-                        <input type="text" name="nama_petugas" id="nama_petugas" value="<?= $currentData["nama_petugas"]; ?>" required>
+                        <label for="nama_peminjaman">Nama: </label>
+                        <input type="text" name="nama_peminjaman" id="nama_peminjaman" value="<?= $currentData["nama_peminjaman"]; ?>" required>
                     </li>
                     <li>
                         <label for="jabatan">Jabatan: </label>
@@ -264,7 +293,7 @@ if( isset($_POST["submitUbah"]) ) {
 				// editData_overlay.classList.add('active');
 	
 				const id = a.getAttribute('href').split('=')[1]; 
-				history.pushState({ id: id }, '', `petugas.php?id=${id}`);
+				history.pushState({ id: id }, '', `peminjaman.php?id=${id}`);
 			});
 		})
 
@@ -275,10 +304,10 @@ if( isset($_POST["submitUbah"]) ) {
 		if (id) {
 			editData_overlay.classList.add('active'); 
 			
-			fetch(`petugas.php?id=${id}`)
+			fetch(`peminjaman.php?id=${id}`)
 				.then(response => response.json())
 				.then(data => {
-					document.getElementById('nama_petugas').value = data.nama_petugas;
+					document.getElementById('nama_peminjaman').value = data.nama_peminjaman;
 					document.getElementById('alamat').value = data.alamat;
 					document.getElementById('no_telepon').value = data.no_telepon;
 					document.getElementById('jenis_kelamin').value = data.jenis_kelamin;
