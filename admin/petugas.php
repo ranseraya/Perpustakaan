@@ -73,7 +73,7 @@ if( isset($_POST["submitUbah"]) ) {
 <body>
     <div class="sidebar">
         <h2><a href="dashboard.php">Admin Dashboard</a></h2>
-        <a href="users.php">Users</a>
+        <!-- <a href="users.php">Users</a> -->
         <a href="buku.php">Kelola Buku</a>
         <a href="anggota.php">Kelola Anggota</a>
         <a href="petugas.php">Kelola Petugas</a>
@@ -132,8 +132,8 @@ if( isset($_POST["submitUbah"]) ) {
 	<tr>
 		<th>No.</th>
 		<!-- <th>Foto</th> -->
-		<th>Id Petugas</th>
 		<th>Foto</th>
+		<th>Id Petugas</th>
 		<th>Nama</th>
 		<th>Jabatan</th>
 		<th>Alamat</th>
@@ -158,7 +158,7 @@ if( isset($_POST["submitUbah"]) ) {
         <td >
 			<div class="td-aksi">
 				<!-- <a id="editData" data-id="<?= $petugas["id_petugas"]; ?>">ubah</a>  -->
-				 <a id="editData" href="petugas.php?id=<?= $row["id_petugas"]; ?>">Ubah</a>
+				 <a id="editData" href="petugas.php?halaman=<?= $halamanAktif; ?> &id=<?= $row["id_petugas"]; ?>">Ubah</a>
 				<a href="../config/hapus.php?aksi=petugas&halaman=<?= $halamanAktif; ?> &id=<?= $row["id_petugas"]; ?>" onclick="return confirm('yakin?');">hapus</a>
 			</div>
 		</td>
@@ -230,6 +230,28 @@ if( isset($_POST["submitUbah"]) ) {
                     <li>
                         <label for="jabatan">Jabatan: </label>
                         <input type="text" name="jabatan" id="jabatan" value="<?= $currentData["jabatan"]; ?>" required>
+                    </li>
+					<li>
+				<li>
+					<label for="alamat">Alamat: </label>
+					<input type="text" name="alamat" id="alamat" value="<?= $currentData["alamat"]; ?>" required>
+				</li>
+				<li>
+					<label for="no_telepon">No Telepon: </label>
+					<input type="text" name="no_telepon" id="no_telepon" value="<?= $currentData["no_telepon"]; ?>" required>
+				</li>
+				<li>
+                        <label for="jenis_kelamin">Jenis Kelamin: </label>
+                        <select id="jenis_kelamin" name="jenis_kelamin">
+                            <option value="Laki-laki" <?= $currentData["jenis_kelamin"] == "Laki-laki" ? "selected" : ""; ?>>Laki-laki</option>
+                            <option value="Perempuan" <?= $currentData["jenis_kelamin"] == "Perempuan" ? "selected" : ""; ?>>Perempuan</option>
+                            <option value="Non-binary" <?= $currentData["jenis_kelamin"] == "Non-binary" ? "selected" : ""; ?>>Non-binary</option>
+                        </select>
+                    </li>
+				<li>
+                        <label for="foto">Foto: </label> <br>
+                        <img src="../assest/images/<?= $currentData['foto']; ?>" width="40"> <br>
+                        <input type="file" name="foto" id="foto">
                     </li>
                     <li>
                         <button type="submit" name="submitUbah">Ubah Data!</button>

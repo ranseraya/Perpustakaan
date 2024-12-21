@@ -354,6 +354,58 @@ function ubahPetugas($data) {
 
 
 
+function cariPeminjaman($keyword) {
+	$query = "SELECT 
+        peminjaman.id_peminjaman,
+        anggota.nama_anggota AS nama_anggota,
+        buku.judul AS judul_buku,
+        petugas.nama_petugas AS nama_petugas,
+        peminjaman.tanggal_peminjaman,
+        peminjaman.tanggal_pengembalian,
+        peminjaman.status_pengembalian
+    FROM 
+        peminjaman
+    JOIN 
+        anggota ON peminjaman.id_anggota = anggota.id_anggota
+    JOIN 
+        buku ON peminjaman.id_buku = buku.id_buku
+    JOIN 
+        petugas ON peminjaman.id_petugas = petugas.id_petugas
+	WHERE
+			  nama_anggota LIKE '%$keyword%' OR
+			  nama_petugas LIKE '%$keyword%' OR
+			  judul LIKE '%$keyword%' OR
+			  tanggal_peminjaman LIKE '%$keyword%' OR
+			  tanggal_pengembalian LIKE '%$keyword%' OR
+			  status_pengembalian LIKE '%$keyword%'
+			";
+	return query($query);
+}
+function tambahPeminjaman($data) {
+	global $conn;
+
+	$nama_anggota = htmlspecialchars($data["nama_anggota"]);
+	$nama_petugas = htmlspecialchars($data["nama_petugas"]);
+	$judul = htmlspecialchars($data["judul"]);
+	$tanggal_peminjaman = htmlspecialchars($data["tanggal_peminjaman"]);
+	$tanggal_pengembalian = htmlspecialchars($data["tanggal_pengembalian"]);
+	$status_pengembalian = htmlspecialchars($data["status_pengembalian"]);
+	// $bertugas_sejak = htmlspecialchars($data["bertugas_sejak"]);
+	$foto = upload();
+	if( !$foto ) {
+		return false;
+	}
+
+	$query = "INSERT INTO peminjaman (nama_petugas, jabatan, alamat, no_telepon, jenis_kelamin, bertugas_sejak, foto)
+				VALUES
+			  ('$nama', '$jabatan', '$alamat', '$no_telepon', '$jenis_kelamin', CURDATE(), '$foto')
+			";
+	mysqli_query($conn, $query);
+
+	return mysqli_affected_rows($conn);
+}
+
+
 
 function upload() {
 

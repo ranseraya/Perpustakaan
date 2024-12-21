@@ -74,7 +74,7 @@ if( isset($_POST["submitUbah"]) ) {
 <body>
     <div class="sidebar">
         <h2><a href="dashboard.php">Admin Dashboard</a></h2>
-        <a href="users.php">Users</a>
+        <!-- <a href="users.php">Users</a> -->
         <a href="buku.php">Kelola Buku</a>
         <a href="anggota.php">Kelola Anggota</a>
         <a href="petugas.php">Kelola Petugas</a>
@@ -160,7 +160,7 @@ if( isset($_POST["submitUbah"]) ) {
         <td >
 			<div class="td-aksi">
 				<!-- <a id="editData" data-id="<?= $buku["id_buku"]; ?>">ubah</a>  -->
-				 <a id="editData" href="buku.php?id=<?= $row["id_buku"]; ?>">Ubah</a>
+				 <a id="editData" href="buku.php?halaman=<?= $halamanAktif; ?> &id=<?= $row["id_buku"]; ?>">Ubah</a>
 				<a href="../config/hapus.php?aksi=buku&halaman=<?= $halamanAktif; ?> &id=<?= $row["id_buku"]; ?>" onclick="return confirm('yakin?');">hapus</a>
 			</div>
 		</td>

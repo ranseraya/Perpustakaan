@@ -58,14 +58,34 @@ $peminjaman = query("SELECT
 
 
 if (isset($_POST["cari"])) {
-    $peminjaman = caripeminjaman($_POST["keyword"]);
+	if($_POST["keyword"] != ""){
+		$peminjaman = cariPeminjaman($_POST["keyword"]);
+	}
 } else {
-    $buku = query("SELECT * FROM peminjaman LIMIT $awalData, $jumlahDataPerHalaman");
+    $peminjaman = query("SELECT 
+        peminjaman.id_peminjaman,
+        anggota.nama_anggota AS nama_anggota,
+        buku.judul AS judul_buku,
+        petugas.nama_petugas AS nama_petugas,
+        peminjaman.tanggal_peminjaman,
+        peminjaman.tanggal_pengembalian,
+        peminjaman.status_pengembalian
+    FROM 
+        peminjaman
+    JOIN 
+        anggota ON peminjaman.id_anggota = anggota.id_anggota
+    JOIN 
+        buku ON peminjaman.id_buku = buku.id_buku
+    JOIN 
+        petugas ON peminjaman.id_petugas = petugas.id_petugas
+    ORDER BY 
+        peminjaman.id_peminjaman ASC 
+    LIMIT $awalData, $jumlahDataPerHalaman");
 }
 
 if( isset($_POST["submitTambah"]) ) {
 	
-	if( tambahpeminjaman($_POST) > 0 ) {
+	if( tambahPeminjaman($_POST) > 0 ) {
 		echo "
 			<script>
 				alert('data berhasil ditambahkan!');
@@ -83,7 +103,7 @@ if( isset($_POST["submitTambah"]) ) {
 }
 
 if( isset($_POST["submitUbah"]) ) {
-	if( ubahpeminjaman($_POST) > 0 ) {
+	if( ubahPeminjaman($_POST) > 0 ) {
 		echo "
 			<script>
 				alert('data berhasil diubah!');
@@ -111,7 +131,7 @@ if( isset($_POST["submitUbah"]) ) {
 <body>
     <div class="sidebar">
         <h2><a href="dashboard.php">Admin Dashboard</a></h2>
-        <a href="users.php">Users</a>
+        <!-- <a href="users.php">Users</a> -->
         <a href="buku.php">Kelola Buku</a>
         <a href="anggota.php">Kelola Anggota</a>
         <a href="petugas.php">Kelola Petugas</a>
@@ -169,13 +189,13 @@ if( isset($_POST["submitUbah"]) ) {
 
 	<tr>
 		<th>No.</th>
-		<th>Id peminjaman</th>
+		<th>Id Peminjaman</th>
 		<th>Nama Anggota</th>
 		<th>Pengurus Peminjaman</th>
 		<th>Judul Buku</th>
 		<th>Tanggal Peminjaman</th>
 		<th>Tanggal Pengembalian</th>
-		<th>Status Pemgembian</th>
+		<th>Status Pengembalian</th>
 		<!-- <th>Aksi</th> -->
 	</tr>
 
@@ -207,32 +227,29 @@ if( isset($_POST["submitUbah"]) ) {
 		<form action="" method="post" enctype="multipart/form-data">
 			<ul>
 				<li>
-					<label for="nama_peminjaman">Nama: </label>
-					<input type="text" name="nama_peminjaman" id="nama_peminjaman" required>
+					<label for="nama_anggota">Nama Peminjam: </label>
+					<input type="text" name="nama_anggota" id="nama_anggota" required>
 				</li>
 				<li>
-					<label for="jabatan">Jabatan: </label>
+					<label for="nama_petugas">Nama Petugas: </label>
 					<input type="text" name="jabatan" id="jabatan" required>
 				</li>
 				<li>
-					<label for="alamat">Alamat: </label>
-					<input type="text" name="alamat" id="alamat" required>
+					<label for="judul">Judul Buku: </label>
+					<input type="text" name="judul" id="judul" required>
 				</li>
 				<li>
-					<label for="no_telepon">No Telepon: </label>
-					<input type="text" name="no_telepon" id="no_telepon" required>
+					<label for="tanggal_peminjaman">Tanggal Awal:</label>
+					<input type="date" id="tanggal_peminjaman" name="tanggal_peminjaman">
+					<label for="tanggal_pengembalian">Tanggal Akhir:</label>
+					<input type="date" id="tanggal_pengembalian" name="tanggal_pengembalian">
 				</li>
 				<li>
-					<label for="jenis_kelamin">Jenis Kelamin: </label>
-					<select id="jenis_kelamin" name="jenis_kelamin">
-						<option value="Laki-laki">Laki-laki</option>
-						<option value="Perempuan">Perempuan</option>
-						<option value="Non-binary">Non-binary</option>
+					<label for="status_pengembalian">Status peminjaman: </label>
+					<select id="status_pengembalian" name="status_pengembalian">
+						<option value="1">Sudah dikembalikan</option>
+						<option value="2">Belum dikembalikan</option>
 					</select>
-				</li>
-				<li>
-					<label for="foto">Foto: </label>
-					<input type="file" name="foto" id="foto">
 				</li>
 				<li>
 					<button type="submit" name="submitTambah">Tambah Data!</button>

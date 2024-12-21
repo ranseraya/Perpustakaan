@@ -30,7 +30,7 @@ $result_peminjaman = $conn->query($query_peminjaman)->fetch_assoc();
 <body>
     <div class="sidebar">
         <h2><a href="dashboard.php">Admin Dashboard</a></h2>
-        <a href="users.php">Users</a>
+        <!-- <a href="users.php">Users</a> -->
         <a href="buku.php">Kelola Buku</a>
         <a href="anggota.php">Kelola Anggota</a>
         <a href="petugas.php">Kelola Petugas</a>
