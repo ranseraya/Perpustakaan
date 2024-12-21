@@ -15,15 +15,21 @@ $currentData = query("SELECT * FROM buku WHERE id_buku = $id")[0];
 $jumlahDataPerHalaman = 10;
 $jumlahData = count(query("SELECT * FROM buku"));
 $jumlahHalaman = ceil($jumlahData / $jumlahDataPerHalaman);
-$halamanAktif = ( isset($_GET["halaman"]) ) ? $_GET["halaman"] : 1;
-$awalData = ( $jumlahDataPerHalaman * $halamanAktif ) - $jumlahDataPerHalaman;
-$buku = query("SELECT * FROM buku LIMIT $awalData, $jumlahDataPerHalaman");
+$halamanAktif = isset($_GET["halaman"]) ? $_GET["halaman"] : 1;
+$awalData = ($jumlahDataPerHalaman * $halamanAktif) - $jumlahDataPerHalaman;
+
+$sortBy = isset($_POST['filter_by']) ? $_POST['filter_by'] : (isset($_GET['filter_by']) ? $_GET['filter_by'] : 'judul');
+$order = 'ASC';
+
+$buku = query("SELECT * FROM buku ORDER BY $sortBy $order LIMIT $awalData, $jumlahDataPerHalaman");
 
 
 if (isset($_POST["cari"])) {
-    $buku = cariBuku($_POST["keyword"]);
+    if($_POST["keyword"] != ''){
+		$buku = cariBuku($_POST["keyword"]);
+	}
 } else {
-    $buku = query("SELECT * FROM buku LIMIT $awalData, $jumlahDataPerHalaman");
+	$buku = query("SELECT * FROM buku ORDER BY $sortBy $order LIMIT $awalData, $jumlahDataPerHalaman");
 }
 
 if( isset($_POST["submitTambah"]) ) {
@@ -100,32 +106,53 @@ if( isset($_POST["submitUbah"]) ) {
 
 <br><br>
 
+<div class="row">
 <div class="page">
-	<a href="?halaman=1">awal</a>
-	
-	<?php if( $halamanAktif > 1 ) : ?>
-		<a href="?halaman=<?= $halamanAktif - 1; ?>">&laquo;</a>
-		<?php endif; ?>
-		
-		<?php for( $i = 1; $i <= $jumlahHalaman; $i++ ) : 
-        if( $i == 1 || $i == $jumlahHalaman || ($i >= $halamanAktif - 1 && $i <= $halamanAktif + 1)) : ?>
-            <?php if( $i == $halamanAktif ) : ?>
-                <a href="?halaman=<?= $i; ?>" style="font-weight: bold; color: red;"><?= $i; ?></a>
+    <a href="?halaman=1&filter_by=<?= $sortBy; ?>">awal</a>
+
+    <?php if ($halamanAktif > 1) : ?>
+        <a href="?halaman=<?= $halamanAktif - 1; ?>&filter_by=<?= $sortBy; ?>">&laquo;</a>
+    <?php endif; ?>
+
+    <?php for ($i = 1; $i <= $jumlahHalaman; $i++) : 
+        if ($i == 1 || $i == $jumlahHalaman || ($i >= $halamanAktif - 1 && $i <= $halamanAktif + 1)) : ?>
+            <?php if ($i == $halamanAktif) : ?>
+                <a href="?halaman=<?= $i; ?>&filter_by=<?= $sortBy; ?>" style="font-weight: bold; color: red;"><?= $i; ?></a>
             <?php else : ?>
-                <a href="?halaman=<?= $i; ?>"><?= $i; ?></a>
+                <a href="?halaman=<?= $i; ?>&filter_by=<?= $sortBy; ?>"><?= $i; ?></a>
             <?php endif; ?>
-        <?php 
-        elseif( $i == $halamanAktif - 2 || $i == $halamanAktif + 2) : ?>
+        <?php elseif ($i == $halamanAktif - 2 || $i == $halamanAktif + 2) : ?>
             <span>...</span>
         <?php endif; ?>
     <?php endfor; ?>
-					
-					<?php if( $halamanAktif < $jumlahHalaman ) : ?>
-						<a href="?halaman=<?= $halamanAktif + 1; ?>">&raquo;</a>
-						<?php endif; ?>
-						
-						<a href="?halaman=<?= $jumlahHalaman; ?>">akhir</a>
-					</div>
+
+    <?php if ($halamanAktif < $jumlahHalaman) : ?>
+        <a href="?halaman=<?= $halamanAktif + 1; ?>&filter_by=<?= $sortBy; ?>">&raquo;</a>
+    <?php endif; ?>
+
+    <a href="?halaman=<?= $jumlahHalaman; ?>&filter_by=<?= $sortBy; ?>">akhir</a>
+</div>
+
+
+    <div class="filter">
+        <form method="post" action="" style="margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div>
+                    <label for="filter-by">Sorting Berdasarkan:</label>
+                    <select id="filter-by" name="filter_by">
+                        <option value="">Pilih Sorting</option>
+                        <option value="judul" <?php echo $sortBy === 'judul' ? 'selected' : ''; ?>>Judul Buku</option>
+                        <option value="tahun_terbit" <?php echo $sortBy === 'tahun_terbit' ? 'selected' : ''; ?>>Tahun Terbit</option>
+                        <option value="jumlah" <?php echo $sortBy === 'jumlah' ? 'selected' : ''; ?>>Jumlah halaman</option>
+                        <option value="stok" <?php echo $sortBy === 'stok' ? 'selected' : ''; ?>>Stok</option>
+						</select>
+                </div>
+                <!-- Tombol Filter -->
+                <button type="submit" name="filter" class="btn-filter">Filter</button>
+            </div>
+        </form>
+    </div>
+	</div>
 
 <br>
 <table border="1" cellpadding="10" cellspacing="0">
@@ -337,11 +364,14 @@ if( isset($_POST["submitUbah"]) ) {
 			fetch(`buku.php?id=${id}`)
 				.then(response => response.json())
 				.then(data => {
-					document.getElementById('nama_anggota').value = data.nama_anggota;
-					document.getElementById('alamat').value = data.alamat;
-					document.getElementById('no_telepon').value = data.no_telepon;
-					document.getElementById('jenis_kelamin').value = data.jenis_kelamin;
-					document.querySelector('#editData-overlay img').src = `../assest/images/${data.foto}`;
+					document.getElementById('judul').value = data.judul;
+					document.getElementById('pengarang').value = data.pengarang;
+					document.getElementById('penerbit').value = data.penerbit;
+					document.getElementById('tahun_terbit').value = data.tahun_terbit;
+					document.getElementById('kategori').value = data.kategori;
+					document.getElementById('jumlah').value = data.jumlah;
+					document.getElementById('ISBN').value = data.ISBN;
+					document.getElementById('stok').value = data.stok;
 				})
 				.catch(error => {
 					console.error('Terjadi kesalahan:', error);
@@ -356,7 +386,6 @@ if( isset($_POST["submitUbah"]) ) {
         close_editData.addEventListener('click', () => {
             editData_overlay.classList.remove('active');
         });
-
 
 
     </script>

@@ -35,6 +35,7 @@ $result_peminjaman = $conn->query($query_peminjaman)->fetch_assoc();
         <a href="anggota.php">Kelola Anggota</a>
         <a href="petugas.php">Kelola Petugas</a>
         <a href="peminjaman.php">Kelola Peminjaman</a>
+        <a href="laporan.php">Laporan</a>
         <a href="../public/logout.php">Logout</a>
     </div>
     <div class="main-content">
